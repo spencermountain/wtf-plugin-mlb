@@ -1,0 +1,34 @@
+{
+  "name": "wtf-mlb",
+  "version": "0.0.1",
+  "description": "parse baseball game data from wikipedia",
+  "main": "./builds/wtf-mlb.js",
+  "scripts": {
+    "watch": "amble ./scratch.js",
+    "test": "\"node_modules/.bin/tape\" \"./tests/*.test.js\" | \"node_modules/.bin/tap-dancer\" --color",
+    "build": "node ./scripts/build.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spencermountain/wtf-mlb.git"
+  },
+  "author": "spencermountain",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/spencermountain/wtf-mlb/issues"
+  },
+  "homepage": "https://github.com/spencermountain/wtf-mlb#readme",
+  "dependencies": {
+    "wtf_wikipedia": "^4.4.0",
+    "amble": "0.0.6",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "babelify": "^8.0.0",
+    "browserify": "^16.2.2",
+    "derequire": "^2.0.6",
+    "shelljs": "^0.8.2",
+    "spacetime": "^4.2.2",
+    "tap-dancer": "0.0.3",
+    "tape": "^4.9.1"
+  }
+}
