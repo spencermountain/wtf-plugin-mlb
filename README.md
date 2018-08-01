@@ -20,7 +20,19 @@
 </div>
 
 ```js
-wtfMLB('Toronto Blue Jays', 2018).then(console.log)
+wtfMLB.fetch('Toronto Blue Jays', 2018).then(console.log)
+//[{
+//   date: 'April 1',
+//   team: 'Reds',
+//   home: false,
+//   result: { us: 6, them: 5, win: true },
+//   record: { wins: 3, losses: 0, games: 3
+// },
+//  ....
+
+
+//or if you already have the doc,
+var json = wtfMLB.parse(doc)
 ```
 
 (work-in-progress)
