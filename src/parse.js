@@ -77,16 +77,17 @@ const parseRow = function(row) {
 const parsePage = function(doc) {
   let games = []
   //grab the generated section called 'Game Log'
-  let section = doc.sections('Game Log')
+  let section = doc.sections('game log')
   if (!section) {
     return games
   }
   let months = section.tables()
+  // console.log(section.wikitext())
   //get rid of extra 'legend' tables
-  months = months.filter(m => m[1] && !m[1].Legend)
+  months = months.filter(table => table.data[1] && !table.data[1].Legend)
   //each month is it's own table
-  months.forEach((rows) => {
-    rows.forEach(row => {
+  months.forEach((table) => {
+    table.data.forEach(row => {
       games.push(parseRow(row))
     })
   })

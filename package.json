@@ -1,6 +1,6 @@
 {
   "name": "wtf-mlb",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "parse baseball game data from wikipedia",
   "main": "./builds/wtf-mlb.js",
   "scripts": {
@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/spencermountain/wtf-mlb#readme",
   "dependencies": {
-    "wtf_wikipedia": "^4.4.0"
+    "wtf_wikipedia": "5.0.0"
   },
   "devDependencies": {
     "amble": "0.0.6",

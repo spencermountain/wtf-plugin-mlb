@@ -16,7 +16,10 @@ const wtfMLB = {
     return wtf.fetch(team).catch(console.log).then(parse)
   },
 
-  parse: parse
+  parse: (wiki) => {
+    var doc = wtf(wiki)
+    return parse(doc)
+  }
 
 }
 module.exports = wtfMLB
