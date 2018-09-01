@@ -16,7 +16,7 @@ const parseRecord = function(s) {
   if (!s) {
     return {}
   }
-  let arr = s.text().split('–')
+  let arr = s.text().split(/[–-]/)
   let obj = {
     wins: parseInt(arr[0], 10),
     losses: parseInt(arr[1], 10),
