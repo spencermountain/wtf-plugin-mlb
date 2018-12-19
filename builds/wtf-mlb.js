@@ -494,28 +494,28 @@ module.exports.default = fetch;
 
 },{}],3:[function(_dereq_,module,exports){
 module.exports={
-  "_from": "wtf_wikipedia@7.2.4",
-  "_id": "wtf_wikipedia@7.2.4",
+  "_from": "wtf_wikipedia@7.2.5",
+  "_id": "wtf_wikipedia@7.2.5",
   "_inBundle": false,
-  "_integrity": "sha512-m5prPqQQDIQ49nh6bzZBiFbY2g4D6vafbsYe+tO+hpNNfAJfm+djFrDVMgq34IG0PB93SK2L8ADzXGDxKVuhNg==",
+  "_integrity": "sha512-c8SjI4osZDbwPqr16PFbjx6VEdUuV+rODdWErDn41vxzUPYhPt1Zih1edLi4rINfOQ2OUZpCyCLSBXUrLg33AQ==",
   "_location": "/wtf_wikipedia",
   "_phantomChildren": {},
   "_requested": {
     "type": "version",
     "registry": true,
-    "raw": "wtf_wikipedia@7.2.4",
+    "raw": "wtf_wikipedia@7.2.5",
     "name": "wtf_wikipedia",
     "escapedName": "wtf_wikipedia",
-    "rawSpec": "7.2.4",
+    "rawSpec": "7.2.5",
     "saveSpec": null,
-    "fetchSpec": "7.2.4"
+    "fetchSpec": "7.2.5"
   },
   "_requiredBy": [
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/wtf_wikipedia/-/wtf_wikipedia-7.2.4.tgz",
-  "_shasum": "18988ce3b8a633fb1610ab9494b7724e3bc4d0f8",
-  "_spec": "wtf_wikipedia@7.2.4",
+  "_resolved": "https://registry.npmjs.org/wtf_wikipedia/-/wtf_wikipedia-7.2.5.tgz",
+  "_shasum": "39bff414d7fb9e40ef92fde4038497512a04f4d9",
+  "_spec": "wtf_wikipedia@7.2.5",
   "_where": "/Users/spencer/mountain/mlb-wtf",
   "author": {
     "name": "Spencer Kelly",
@@ -547,7 +547,7 @@ module.exports={
     "tap-dancer": "0.1.2",
     "tap-spec": "5.0.0",
     "tape": "4.9.1",
-    "uglify-js": "3.4.9"
+    "terser": "^3.12.0"
   },
   "engines": {
     "node": ">=6.0.0"
@@ -584,7 +584,7 @@ module.exports={
     "watch": "amble ./scratch.js"
   },
   "unpkg": "builds/wtf_wikipedia.min.js",
-  "version": "7.2.4"
+  "version": "7.2.5"
 }
 
 },{}],4:[function(_dereq_,module,exports){
@@ -10509,11 +10509,39 @@ const inline = {
     let text = obj.text || '';
     return text.padEnd(obj.num, obj.str || '0');
   },
+  //abbreviation/meaning
+  //https://en.wikipedia.org/wiki/Template:Abbr
+  'abbr': ( tmpl = '' ) => {
+    let obj = parse(tmpl, ['abbr', 'meaning', 'ipa']);
+    return obj.abbr;
+  },
+  //https://en.wikipedia.org/wiki/Template:Abbrlink
+  'abbrlink': ( tmpl = '' ) => {
+    let obj = parse(tmpl, ['abbr', 'page']);
+    if (obj.page) {
+      return `[[${obj.page}|${obj.abbr}]]`;
+    }
+    return `[[${obj.abbr}]]`;
+  },
+  //https://en.wikipedia.org/wiki/Template:Hover_title
+  //technically 'h:title'
+  'h': ( tmpl = '' ) => {
+    let obj = parse(tmpl, ['title', 'text']);
+    return obj.text;
+  },
+  //https://en.wikipedia.org/wiki/Template:Finedetail
+  'finedetail': ( tmpl = '' ) => {
+    let obj = parse(tmpl, ['text', 'detail']); //technically references
+    return obj.text;
+  },
 };
 
 //aliases
 inline['str left'] = inline.trunc;
 inline['str crop'] = inline.trunc;
+inline['tooltip'] = inline.abbr;
+inline['abbrv'] = inline.abbr;
+inline['define'] = inline.abbr;
 
 module.exports = inline;
 
@@ -10561,6 +10589,7 @@ let punctuation = [
   ['asterisk', '*'],
   ['long dash', '———'],
   ['clear', '\n\n'],
+  ['h.', 'ḥ'],
 ];
 const templates = {};
 punctuation.forEach((a) => {
@@ -11855,7 +11884,13 @@ const misc = {
   'baseball secondary style': function(tmpl) {
     let obj = parse(tmpl, ['name']);
     return obj.name;
-  }
+  },
+  'mlbplayer': function(tmpl, r) {
+    let obj = parse(tmpl, ['number', 'name', 'dl']);
+    r.templates.push(obj);
+    return obj.name;
+  },
+
 };
 
 module.exports = Object.assign({},
@@ -12535,11 +12570,13 @@ var wtfMLB = {
 };
 module.exports = wtfMLB;
 
-},{"../_version":1,"./parse":147,"./teams":148,"wtf_wikipedia":90}],147:[function(_dereq_,module,exports){
+},{"../_version":1,"./parse":147,"./teams":149,"wtf_wikipedia":90}],147:[function(_dereq_,module,exports){
 "use strict";
 
 //who knows!
 var parseRow = _dereq_('./_parseRow');
+
+var playerStats = _dereq_('./playerStats');
 
 var parseTitle = function parseTitle() {
   var season = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
@@ -12551,6 +12588,42 @@ var parseTitle = function parseTitle() {
     season: season,
     team: team.trim()
   };
+}; //this is just a table in a 'roster' section
+
+
+var parseRoster = function parseRoster(doc) {
+  var s = doc.sections('roster');
+
+  if (!s) {
+    return {};
+  }
+
+  var players = s.templates('mlbplayer') || [];
+  players = players.map(function (o) {
+    delete o.template;
+    return o;
+  });
+  return players;
+}; //this is just a table in a '2008 draft picks' section
+
+
+var draftPicks = function draftPicks(doc) {
+  var want = /\bdraft\b/i;
+  var s = doc.sections().find(function (sec) {
+    return want.test(sec.title());
+  });
+
+  if (!s) {
+    return [];
+  }
+
+  var table = s.tables(0);
+
+  if (!table) {
+    return [];
+  }
+
+  return table.keyValue();
 }; //grab game-data from a MLB team's wikipedia page:
 
 
@@ -12600,13 +12673,54 @@ var parsePage = function parsePage(doc) {
     return g.team && g.date && g.result.winner !== undefined;
   });
   var res = parseTitle(doc.title());
-  res.games = games;
+  res.games = games; //grab the roster/draft data
+
+  res.roster = parseRoster(doc);
+  res.draftPicks = draftPicks(doc); //get the per-player statistics
+
+  res.playerStats = playerStats(doc);
   return res;
 };
 
 module.exports = parsePage;
 
-},{"./_parseRow":145}],148:[function(_dereq_,module,exports){
+},{"./_parseRow":145,"./playerStats":148}],148:[function(_dereq_,module,exports){
+"use strict";
+
+//
+var playerStats = function playerStats(doc) {
+  var players = [];
+  var s = doc.sections('player stats') || doc.sections('player statistics') || doc.sections('statistics');
+
+  if (!s) {
+    return players;
+  }
+
+  s.children().forEach(function (c) {
+    c.tables().forEach(function (t) {
+      players = players.concat(t.keyValue());
+    });
+  });
+  var res = {
+    batters: [],
+    pitchers: []
+  };
+  players.forEach(function (p) {
+    var rbi = p.RBI || p.rbi;
+    var hr = p.HR || p.hr;
+
+    if (rbi !== undefined || hr !== undefined) {
+      res.batters.push(p);
+    } else {
+      res.pitchers.push(p);
+    }
+  });
+  return res;
+};
+
+module.exports = playerStats;
+
+},{}],149:[function(_dereq_,module,exports){
 "use strict";
 
 module.exports = ["Arizona Diamondbacks", "Atlanta Braves", "Baltimore Orioles", "Boston Red Sox", "Chicago Cubs", "Chicago White Sox", "Cincinnati Reds", "Cleveland Indians", "Colorado Rockies", "Detroit Tigers", "Houston Astros", "Kansas City Royals", "Los Angeles Angels", "Los Angeles Dodgers", "Miami Marlins", "Milwaukee Brewers", "Minnesota Twins", "New York Mets", "New York Yankees", "Oakland Athletics", "Philadelphia Phillies", "Pittsburgh Pirates", "San Diego Padres", "San Francisco Giants", "Seattle Mariners", "St. Louis Cardinals", "Tampa Bay Rays", "Texas Rangers", "Toronto Blue Jays", "Washington Nationals", //former teams

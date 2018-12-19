@@ -39,7 +39,7 @@ var json = wtfMLB.parse(doc)
 
 to do a bunch of years in a row:
 ```js
-wtfMLB.history('Montreal Expos', 1992, 1997).catch(console.log).then(data => {
+wtfMLB.history('St. Louis Cardinals', 1992, 1997).catch(console.log).then(data => {
   data = data.map((obj) => {
     //grab just the date and attendance
     obj.games = obj.games.map((g) => [g.date, g.attendance])
