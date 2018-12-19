@@ -1,8 +1,8 @@
 {
   "name": "wtf-mlb",
-  "version": "0.1.1",
+  "version": "0.2.1",
   "description": "parse baseball game data from wikipedia",
-  "main": "./builds/wtf-mlb.js",
+  "main": "builds/wtf-mlb.js",
   "scripts": {
     "watch": "amble ./scratch.js",
     "test": "\"node_modules/.bin/tape\" \"./tests/*.test.js\" | \"node_modules/.bin/tap-dancer\" --color",
@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/spencermountain/wtf-mlb#readme",
   "dependencies": {
-    "wtf_wikipedia": "7.2.2"
+    "wtf_wikipedia": "7.2.3"
   },
   "devDependencies": {
     "@babel/core": "7.2.2",

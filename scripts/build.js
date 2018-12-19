@@ -28,6 +28,7 @@ var cmd = browserify + ' ./src/index.js --standalone wtf-mlb';
 cmd += ' -t [ babelify --presets [ @babel/preset-env ] ]';
 cmd += ' | ' + derequire;
 cmd += ' >> ' + uncompressed;
+console.log(cmd)
 exec(cmd);
 
 //uglify

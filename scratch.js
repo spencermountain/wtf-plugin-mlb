@@ -4,6 +4,7 @@ const wtfMLB = require('./src')
 wtfMLB.fetch('Toronto Blue Jays', 2018).catch(console.log).then((data => {
   console.log(data.slice(0, 5))
   console.log(data.length)
+  console.log(data.slice(166, data.length))
 }))
 //
 // let str = `
