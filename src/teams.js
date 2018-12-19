@@ -29,4 +29,13 @@ module.exports = [
   "Texas Rangers",
   "Toronto Blue Jays",
   "Washington Nationals",
+
+  //former teams
+  "Montreal Expos",
+  "Washington Senators",
+  "Seattle Pilots",
+  "Kansas City Athletics",
+  "Milwaukee Braves",
+  "Washington Senators",
+  "Brooklyn Dodgers"
 ]

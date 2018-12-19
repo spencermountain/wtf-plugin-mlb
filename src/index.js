@@ -1,4 +1,5 @@
 const wtf = require('wtf_wikipedia')
+// const wtf = require('/Users/spencer/mountain/wtf_wikipedia/')
 const teams = require('./teams')
 const parse = require('./parse')
 const version = require('../_version')
@@ -12,8 +13,25 @@ const wtfMLB = {
       return t === team || t.toLowerCase().includes(team.toLowerCase())
     })
     year = year || new Date().getFullYear()
-    team = `${year}_${team.replace(/ /g, '_')}_season`
-    return wtf.fetch(team).catch(console.log).then(parse)
+    team = team.replace(/ /g, '_')
+    let page = `${year}_${team}_season`
+    return wtf.fetch(page).catch(console.log).then(parse)
+  },
+
+  history: function(team, from, to) {
+    //soften-up the team-input
+    team = teams.find(t => {
+      return t === team || t.toLowerCase().includes(team.toLowerCase())
+    })
+    team = team.replace(/ /g, '_')
+    let pages = []
+    for (let i = from; i <= to; i += 1) {
+      pages.push(`${i}_${team}_season`)
+    }
+    return wtf.fetch(pages).catch(console.log).then((docs) => {
+      docs = typeof docs.map !== 'function' ? [docs] : docs
+      return docs.map(parse)
+    })
   },
 
   parse: (wiki) => {

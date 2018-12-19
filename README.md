@@ -19,6 +19,8 @@
   <code>npm install wtf-mlb</code>
 </div>
 
+wtf-mlb is a wrapper of [wtf_wikipedia](https://github.com/spencermountain/wtf_wikipedia/) that supports a bunch of different variants of mlb game log variations, that are used sometimes in the wild.
+
 ```js
 wtfMLB.fetch('Toronto Blue Jays', 2018).then(console.log)
 //[{
@@ -33,6 +35,18 @@ wtfMLB.fetch('Toronto Blue Jays', 2018).then(console.log)
 
 //or if you already have the doc,
 var json = wtfMLB.parse(doc)
+```
+
+to do a bunch of years in a row:
+```js
+wtfMLB.history('Montreal Expos', 1992, 1997).catch(console.log).then(data => {
+  data = data.map((obj) => {
+    //grab just the date and attendance
+    obj.games = obj.games.map((g) => [g.date, g.attendance])
+    return obj
+  })
+  console.log(JSON.stringify(data, null, 2))
+})
 ```
 
 (work-in-progress)

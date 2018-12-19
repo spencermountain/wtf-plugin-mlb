@@ -1,4 +1,4 @@
-/* wtf-mlb v0.2.1
+/* wtf-mlb v1.0.0
    github.com/spencermountain/wtf-mlb
    MIT
 */
@@ -6,7 +6,7 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.wtfMlb = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(_dereq_,module,exports){
 "use strict";
 
-module.exports = '0.2.1';
+module.exports = '1.0.0';
 
 },{}],2:[function(_dereq_,module,exports){
 var __root__ = (function (root) {
@@ -494,28 +494,28 @@ module.exports.default = fetch;
 
 },{}],3:[function(_dereq_,module,exports){
 module.exports={
-  "_from": "wtf_wikipedia@7.2.3",
-  "_id": "wtf_wikipedia@7.2.3",
+  "_from": "wtf_wikipedia@7.2.4",
+  "_id": "wtf_wikipedia@7.2.4",
   "_inBundle": false,
-  "_integrity": "sha512-yaXsX7BQYlp5A38cE+BhfOaA3FcNGRNtm8EKGNwdcVwjkvWocLM2qs2/GIN705SYZMCGvAQ9cVzvOv8diU805A==",
+  "_integrity": "sha512-m5prPqQQDIQ49nh6bzZBiFbY2g4D6vafbsYe+tO+hpNNfAJfm+djFrDVMgq34IG0PB93SK2L8ADzXGDxKVuhNg==",
   "_location": "/wtf_wikipedia",
   "_phantomChildren": {},
   "_requested": {
     "type": "version",
     "registry": true,
-    "raw": "wtf_wikipedia@7.2.3",
+    "raw": "wtf_wikipedia@7.2.4",
     "name": "wtf_wikipedia",
     "escapedName": "wtf_wikipedia",
-    "rawSpec": "7.2.3",
+    "rawSpec": "7.2.4",
     "saveSpec": null,
-    "fetchSpec": "7.2.3"
+    "fetchSpec": "7.2.4"
   },
   "_requiredBy": [
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/wtf_wikipedia/-/wtf_wikipedia-7.2.3.tgz",
-  "_shasum": "9d2dfb7a8f9951b53cc7c6f4e85e64160e71f500",
-  "_spec": "wtf_wikipedia@7.2.3",
+  "_resolved": "https://registry.npmjs.org/wtf_wikipedia/-/wtf_wikipedia-7.2.4.tgz",
+  "_shasum": "18988ce3b8a633fb1610ab9494b7724e3bc4d0f8",
+  "_spec": "wtf_wikipedia@7.2.4",
   "_where": "/Users/spencer/mountain/mlb-wtf",
   "author": {
     "name": "Spencer Kelly",
@@ -584,7 +584,7 @@ module.exports={
     "watch": "amble ./scratch.js"
   },
   "unpkg": "builds/wtf_wikipedia.min.js",
-  "version": "7.2.3"
+  "version": "7.2.4"
 }
 
 },{}],4:[function(_dereq_,module,exports){
@@ -1566,6 +1566,7 @@ methods.last = methods.lastSibling;
 methods.previousSibling = methods.lastSibling;
 methods.previous = methods.lastSibling;
 methods.citations = methods.references;
+methods.sections = methods.children;
 Object.keys(methods).forEach(k => {
   Section.prototype[k] = methods[k];
 });
@@ -2016,9 +2017,9 @@ let headings = ['#', 'date', 'opponent', 'score', 'win', 'loss', 'save', 'attend
 
 
 const parseMlb = function(wiki, section) {
-  wiki = wiki.replace(/\{\{mlb game log section[\s\S]+?\{\{mlb game log section end\}\}/gi, (tmpl) => {
+  wiki = wiki.replace(/\{\{mlb game log (section|month)[\s\S]+?\{\{mlb game log (section|month) end\}\}/gi, (tmpl) => {
     tmpl = tmpl.replace(/^\{\{.*?\}\}/, '');
-    tmpl = tmpl.replace(/\{\{mlb game log section end\}\}/i, '');
+    tmpl = tmpl.replace(/\{\{mlb game log (section|month) end\}\}/i, '');
     let headers = '! ' + headings.join(' !! ');
     let table = '{|\n' + headers + '\n' + tmpl + '\n|}';
     let rows = tableParser(table);
@@ -2479,8 +2480,16 @@ const parseTable = function(wiki) {
   rows = handleSpans(rows);
   //grab the header rows
   let headers = findHeaders(rows);
-  if (!headers || headers.length === 0) {
+  if (!headers || headers.length <= 1) {
     headers = firstRowHeader(rows);
+    let want = rows[rows.length - 1].length;
+    //try the second row
+    if (headers.length <= 1 && want > 2) {
+      headers = firstRowHeader(rows.slice(1));
+      if (headers.length > 0) {
+        rows = rows.slice(2); //remove them
+      }
+    }
   }
   //index each column by it's header
   let table = rows.map(arr => {
@@ -8232,7 +8241,13 @@ const fetchPage = function( pages = [] , a, b, c) {
     pages = [pages];
   }
   let {lang, options, callback} = getParams(a, b, c);
-  return new Promise(function(resolve) {
+  return new Promise(function(resolve, reject) {
+    // courtesy-check for spamming wp servers
+    if (pages.length > 500) {
+      console.error('wtf_wikipedia error: Requested ' + pages.length + ' pages.');
+      reject('Requested too many pages, exiting.');
+      return;
+    }
     doPages(pages, [], lang, options, (docs) => {
       docs = docs.filter((d) => d !== null);
       //return the first doc, if we only asked for one
@@ -12380,7 +12395,101 @@ module.exports = templates;
 },{"../_parsers/parse":106}],145:[function(_dereq_,module,exports){
 "use strict";
 
-var wtf = _dereq_('wtf_wikipedia');
+var parseTeam = function parseTeam(txt) {
+  if (!txt) {
+    return {};
+  }
+
+  var away = /^ *@ */.test(txt);
+  return {
+    name: txt.replace(/^ *\@ */, ''),
+    home: !away
+  };
+};
+
+var parseRecord = function parseRecord(txt) {
+  if (!txt) {
+    return {};
+  }
+
+  var arr = txt.split(/(–|-|&ndash;)/);
+  var obj = {
+    wins: parseInt(arr[0], 10),
+    losses: parseInt(arr[2], 10)
+  };
+  obj.games = obj.wins + obj.losses;
+  var plusMinus = obj.wins / obj.games;
+  obj.plusMinus = Number(plusMinus.toFixed(2));
+  return obj;
+};
+
+var parseScore = function parseScore(txt) {
+  if (!txt) {
+    return {};
+  }
+
+  var arr = txt.split(/(–|-|&ndash;)/);
+  var obj = {
+    winner: parseInt(arr[0], 10),
+    loser: parseInt(arr[2], 10)
+  };
+
+  if (isNaN(obj.winner) || isNaN(obj.loser)) {
+    return {};
+  }
+
+  return obj;
+};
+
+var parseAttendance = function parseAttendance() {
+  var txt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+
+  //support [[Rogers Center]] (23,987)
+  if (txt.indexOf('(') !== -1) {
+    var m = txt.match(/\(([0-9 ,]+)\)/);
+
+    if (m && m[1]) {
+      txt = m[1];
+    }
+  }
+
+  txt = txt.replace(/,/g, '');
+  return parseInt(txt, 10);
+};
+
+var parseDate = function parseDate(txt) {
+  if (!txt) {
+    return null;
+  }
+
+  return txt;
+};
+
+var parseRow = function parseRow(row) {
+  if (!row) {
+    return null;
+  }
+
+  var team = parseTeam(row.opponent || row.Opponent);
+  var record = parseRecord(row.record || row.Record);
+  var obj = {
+    date: parseDate(row.date || row.Date),
+    team: team.name || team.Name,
+    home: team.home || team.Home,
+    result: parseScore(row.score || row.Score || row['box score'] || row['Box Score']),
+    record: record,
+    attendance: parseAttendance(row.attendance || row.Attendance || row['location (attendance)'] || row['Location (Attendance)'])
+  };
+  return obj;
+};
+
+module.exports = parseRow;
+
+},{}],146:[function(_dereq_,module,exports){
+"use strict";
+
+var wtf = _dereq_('wtf_wikipedia'); // const wtf = require('/Users/spencer/mountain/wtf_wikipedia/')
+
 
 var teams = _dereq_('./teams');
 
@@ -12396,8 +12505,26 @@ var wtfMLB = {
       return t === team || t.toLowerCase().includes(team.toLowerCase());
     });
     year = year || new Date().getFullYear();
-    team = "".concat(year, "_").concat(team.replace(/ /g, '_'), "_season");
-    return wtf.fetch(team).catch(console.log).then(_parse);
+    team = team.replace(/ /g, '_');
+    var page = "".concat(year, "_").concat(team, "_season");
+    return wtf.fetch(page).catch(console.log).then(_parse);
+  },
+  history: function history(team, from, to) {
+    //soften-up the team-input
+    team = teams.find(function (t) {
+      return t === team || t.toLowerCase().includes(team.toLowerCase());
+    });
+    team = team.replace(/ /g, '_');
+    var pages = [];
+
+    for (var i = from; i <= to; i += 1) {
+      pages.push("".concat(i, "_").concat(team, "_season"));
+    }
+
+    return wtf.fetch(pages).catch(console.log).then(function (docs) {
+      docs = typeof docs.map !== 'function' ? [docs] : docs;
+      return docs.map(_parse);
+    });
   },
   parse: function parse(wiki) {
     var doc = wtf(wiki);
@@ -12408,137 +12535,82 @@ var wtfMLB = {
 };
 module.exports = wtfMLB;
 
-},{"../_version":1,"./parse":146,"./teams":147,"wtf_wikipedia":90}],146:[function(_dereq_,module,exports){
+},{"../_version":1,"./parse":147,"./teams":148,"wtf_wikipedia":90}],147:[function(_dereq_,module,exports){
 "use strict";
 
 //who knows!
-var parseTeam = function parseTeam(s) {
-  if (!s) {
-    return {};
-  }
+var parseRow = _dereq_('./_parseRow');
 
-  var txt = s.text();
-  var away = /^ *@ */.test(txt);
+var parseTitle = function parseTitle() {
+  var season = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+  var num = season.match(/[0-9]+/) || [];
+  var year = Number(num[0]) || season;
+  var team = season.replace(/[0-9]+/, '').replace(/_/g, ' ').replace(' season', '');
   return {
-    name: txt.replace(/^ *\@ */, ''),
-    home: !away
+    year: year,
+    season: season,
+    team: team.trim()
   };
-};
-
-var parseRecord = function parseRecord(s) {
-  if (!s) {
-    return {};
-  }
-
-  var arr = s.text().split(/[–-]/);
-  var obj = {
-    wins: parseInt(arr[0], 10),
-    losses: parseInt(arr[1], 10)
-  };
-  obj.games = obj.wins + obj.losses;
-  return obj;
-};
-
-var parseScore = function parseScore(s) {
-  if (!s) {
-    return {};
-  }
-
-  var arr = s.text().split('–');
-  var obj = {
-    us: parseInt(arr[0], 10),
-    them: parseInt(arr[1], 10)
-  };
-  obj.win = obj.us > obj.them;
-
-  if (isNaN(obj.us) || isNaN(obj.them)) {
-    return {};
-  }
-
-  return obj;
-};
-
-var parseAttendance = function parseAttendance(s) {
-  if (!s) {
-    return null;
-  }
-
-  var txt = s.text() || ''; //support [[Rogers Center]] (23,987)
-
-  if (txt.indexOf('(') !== -1) {
-    var m = txt.match(/\(([0-9 ,]+)\)/);
-
-    if (m && m[1]) {
-      txt = m[1];
-    }
-  }
-
-  txt = txt.replace(/,/g, '');
-  return parseInt(txt, 10);
-};
-
-var parseDate = function parseDate(s) {
-  if (!s) {
-    return null;
-  }
-
-  return s.text();
-};
-
-var parseRow = function parseRow(row) {
-  if (!row) {
-    return null;
-  }
-
-  var team = parseTeam(row.Opponent);
-  var record = parseRecord(row.Record);
-  var obj = {
-    date: parseDate(row.Date),
-    team: team.name,
-    home: team.home,
-    result: parseScore(row.Score || row['Box Score']),
-    record: record,
-    attendance: parseAttendance(row.Attendance || row['Location (Attendance)'])
-  };
-  return obj;
 }; //grab game-data from a MLB team's wikipedia page:
 
 
 var parsePage = function parsePage(doc) {
   var games = []; //grab the generated section called 'Game Log'
 
-  var section = doc.sections('game log');
+  var section = doc.sections('game log') || doc.sections('regular season') || doc.sections('season');
 
   if (!section) {
+    console.warn('no game log section for: \'' + doc.title() + '\'');
     return games;
   }
 
-  var months = section.tables(); // console.log(section.wikitext())
-  //get rid of extra 'legend' tables
+  var months = section.tables(); //do all subsections, too
 
-  months = months.filter(function (table) {
-    return table.data[1] && !table.data[1].Legend;
-  }); // console.log(months[months.length-1])
-  //each month is it's own table
+  section.children().forEach(function (s) {
+    months = months.concat(s.tables());
+  }); //try to find a game log template
+
+  if (months.length === 0) {
+    months = section.templates('mlb game log section') || section.templates('mlb game log month');
+    months = months.map(function (m) {
+      return m.data;
+    }); //make it look like a table
+  } else {
+    months = months.map(function (t) {
+      return t.keyValue();
+    }); //get rid of extra 'legend' tables
+
+    months = months.filter(function (table) {
+      if (table.data && table.data[1]) {
+        return !table.data[1].Legend;
+      }
+
+      return true;
+    });
+  } //each month is it's own table
+
 
   months.forEach(function (table) {
-    table.data.forEach(function (row) {
+    table.forEach(function (row) {
       games.push(parseRow(row));
     });
   }); //remove empty weird ones
 
   games = games.filter(function (g) {
-    return g.team && g.date;
+    return g.team && g.date && g.result.winner !== undefined;
   });
-  return games;
+  var res = parseTitle(doc.title());
+  res.games = games;
+  return res;
 };
 
 module.exports = parsePage;
 
-},{}],147:[function(_dereq_,module,exports){
+},{"./_parseRow":145}],148:[function(_dereq_,module,exports){
 "use strict";
 
-module.exports = ["Arizona Diamondbacks", "Atlanta Braves", "Baltimore Orioles", "Boston Red Sox", "Chicago Cubs", "Chicago White Sox", "Cincinnati Reds", "Cleveland Indians", "Colorado Rockies", "Detroit Tigers", "Houston Astros", "Kansas City Royals", "Los Angeles Angels", "Los Angeles Dodgers", "Miami Marlins", "Milwaukee Brewers", "Minnesota Twins", "New York Mets", "New York Yankees", "Oakland Athletics", "Philadelphia Phillies", "Pittsburgh Pirates", "San Diego Padres", "San Francisco Giants", "Seattle Mariners", "St. Louis Cardinals", "Tampa Bay Rays", "Texas Rangers", "Toronto Blue Jays", "Washington Nationals"];
+module.exports = ["Arizona Diamondbacks", "Atlanta Braves", "Baltimore Orioles", "Boston Red Sox", "Chicago Cubs", "Chicago White Sox", "Cincinnati Reds", "Cleveland Indians", "Colorado Rockies", "Detroit Tigers", "Houston Astros", "Kansas City Royals", "Los Angeles Angels", "Los Angeles Dodgers", "Miami Marlins", "Milwaukee Brewers", "Minnesota Twins", "New York Mets", "New York Yankees", "Oakland Athletics", "Philadelphia Phillies", "Pittsburgh Pirates", "San Diego Padres", "San Francisco Giants", "Seattle Mariners", "St. Louis Cardinals", "Tampa Bay Rays", "Texas Rangers", "Toronto Blue Jays", "Washington Nationals", //former teams
+"Montreal Expos", "Washington Senators", "Seattle Pilots", "Kansas City Athletics", "Milwaukee Braves", "Washington Senators", "Brooklyn Dodgers"];
 
-},{}]},{},[145])(145)
+},{}]},{},[146])(146)
 });
