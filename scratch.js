@@ -1,26 +1,27 @@
 const wtfMLB = require('./src')
 // const wtf = require('wtf_wikipedia')
 
-// wtfMLB.fetch('Toronto Blue Jays', 2014).catch(console.log).then((obj => {
-//   console.log(JSON.stringify(obj, null, 2))
-// }))
+wtfMLB.fetch('Toronto Blue Jays', 2007).catch(console.log).then((obj => {
+  console.log(obj)
+// console.log(JSON.stringify(obj.roster, null, 2))
+}))
 
-wtfMLB.history('Toronto Blue Jays', 1977, 2018).catch(console.log).then(data => {
-  data = data.map((obj) => {
-    if (!obj.games) {
-      console.log(obj.season)
-      return obj
-    }
-    // obj.games = obj.games.length
-    obj.games = obj.games.map((g) => {
-      let fifty = g.record.games / 2
-      let underOver = g.record.wins - fifty
-      return [g.date, g.attendance, underOver]
-    })
-    return obj
-  })
-  console.log(JSON.stringify(data, null, 2))
-})
+// wtfMLB.history('Toronto Blue Jays', 1977, 2018).catch(console.log).then(data => {
+//   data = data.map((obj) => {
+//     if (!obj.games) {
+//       console.log(obj.season)
+//       return obj
+//     }
+//     // obj.games = obj.games.length
+//     obj.games = obj.games.map((g) => {
+//       let fifty = g.record.games / 2
+//       let underOver = g.record.wins - fifty
+//       return [g.date, g.attendance, underOver]
+//     })
+//     return obj
+//   })
+//   console.log(JSON.stringify(data, null, 2))
+// })
 //
 // let str = `
 // == Game log ==

@@ -1,5 +1,6 @@
 //who knows!
 const parseRow = require('./_parseRow')
+const playerStats = require('./playerStats')
 
 const parseTitle = function(season = '') {
   let num = season.match(/[0-9]+/) || []
@@ -10,6 +11,34 @@ const parseTitle = function(season = '') {
     season: season,
     team: team.trim()
   }
+}
+
+//this is just a table in a 'roster' section
+const parseRoster = function(doc) {
+  let s = doc.sections('roster')
+  if (!s) {
+    return {}
+  }
+  let players = s.templates('mlbplayer') || []
+  players = players.map(o => {
+    delete o.template
+    return o
+  })
+  return players
+}
+
+//this is just a table in a '2008 draft picks' section
+const draftPicks = function(doc) {
+  let want = /\bdraft\b/i
+  let s = doc.sections().find(sec => want.test(sec.title()))
+  if (!s) {
+    return []
+  }
+  let table = s.tables(0)
+  if (!table) {
+    return []
+  }
+  return table.keyValue()
 }
 
 //grab game-data from a MLB team's wikipedia page:
@@ -48,8 +77,14 @@ const parsePage = function(doc) {
   })
   //remove empty weird ones
   games = games.filter((g) => g.team && g.date && g.result.winner !== undefined)
+
   let res = parseTitle(doc.title())
   res.games = games
+  //grab the roster/draft data
+  res.roster = parseRoster(doc)
+  res.draftPicks = draftPicks(doc)
+  //get the per-player statistics
+  res.playerStats = playerStats(doc)
   return res
 }
 module.exports = parsePage
