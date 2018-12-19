@@ -25,7 +25,7 @@ echo(banner).to(compressed);
 
 //browserify + derequire
 var cmd = browserify + ' ./src/index.js --standalone wtf-mlb';
-cmd += ' -t [ babelify --presets [ @babel/preset-env ] ]';
+cmd += ' -t [ babelify --presets [ @babel/preset-env ] ] ' //--no-browser-field';
 cmd += ' | ' + derequire;
 cmd += ' >> ' + uncompressed;
 console.log(cmd)
@@ -34,7 +34,6 @@ exec(cmd);
 //uglify
 cmd = terser + ' ' + uncompressed + ' --mangle --compress ';
 cmd += ' >> ' + compressed;
-console.log(cmd)
 exec(cmd);
 
 //log the size of our builds
