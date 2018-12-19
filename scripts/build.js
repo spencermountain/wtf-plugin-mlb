@@ -34,7 +34,6 @@ exec(cmd);
 //uglify
 cmd = uglify + ' ' + uncompressed + ' --mangle --compress ';
 cmd += ' >> ' + compressed;
-console.log(cmd)
 exec(cmd);
 
 //log the size of our builds
