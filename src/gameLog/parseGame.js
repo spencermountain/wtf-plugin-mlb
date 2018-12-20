@@ -1,3 +1,4 @@
+const dashSplit = /(–|-|−|&ndash;)/
 
 const parseTeam = function(txt) {
   if (!txt) {
@@ -14,10 +15,10 @@ const parseRecord = function(txt) {
   if (!txt) {
     return {}
   }
-  let arr = txt.split(/(–|-|&ndash;)/)
+  let arr = txt.split(dashSplit)
   let obj = {
-    wins: parseInt(arr[0], 10),
-    losses: parseInt(arr[2], 10),
+    wins: parseInt(arr[0], 10) || 0,
+    losses: parseInt(arr[2], 10) || 0,
   }
   obj.games = obj.wins + obj.losses
   let plusMinus = obj.wins / obj.games
@@ -29,7 +30,8 @@ const parseScore = function(txt) {
   if (!txt) {
     return {}
   }
-  let arr = txt.split(/(–|-|&ndash;)/)
+  txt = txt.replace(/^[wl] /i, '')
+  let arr = txt.split(dashSplit)
   let obj = {
     winner: parseInt(arr[0], 10),
     loser: parseInt(arr[2], 10),
@@ -51,11 +53,22 @@ const parseAttendance = function(txt = '') {
   txt = txt.replace(/,/g, '')
   return parseInt(txt, 10)
 }
-const parseDate = function(txt) {
-  if (!txt) {
-    return null
+
+const parsePitchers = function(row) {
+  let win = row.Win || row.win || ''
+  win = win.replace(/\(.*?\)/, '').trim()
+  let loss = row.Loss || row.loss || ''
+  loss = loss.replace(/\(.*?\)/, '').trim()
+  let save = row.Save || row.save || ''
+  save = save.replace(/\(.*?\)/, '').trim()
+  if (dashSplit.test(save) === true) {
+    save = null
   }
-  return txt
+  return {
+    win: win,
+    loss: loss,
+    save: save,
+  }
 }
 
 const parseRow = function(row) {
@@ -65,9 +78,10 @@ const parseRow = function(row) {
   let team = parseTeam(row.opponent || row.Opponent)
   let record = parseRecord(row.record || row.Record)
   let obj = {
-    date: parseDate(row.date || row.Date),
+    date: row.date || row.Date,
     team: team.name || team.Name,
-    home: team.home || team.Home,
+    home: team.home || team.Home || false,
+    pitchers: parsePitchers(row),
     result: parseScore(row.score || row.Score || row['box score'] || row['Box Score']),
     record: record,
     attendance: parseAttendance(row.attendance || row.Attendance || row['location (attendance)'] || row['Location (Attendance)'])

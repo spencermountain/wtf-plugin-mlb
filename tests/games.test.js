@@ -21,7 +21,7 @@ test('Blue Jays 2016', t => {
   wtfMlb.fetch('Blue Jays', 2016).catch(console.log).then((res => {
     var data = res.games
     t.equal(data[0].date, 'April 3', 'has game-0-date')
-    // t.equal(data[0].result.win, true, 'has game-0-win')
+    t.equal(data[0].win, true, 'has game-0-win')
     // t.equal(data.length, 170, 'has 162 games') //+ rain outs?
     t.ok(data.length > 161, 'has atleast 161 games') //+ rain outs?
     t.equal(data[data.length - 1].record.wins, 89, 'got last record')
@@ -36,8 +36,8 @@ test('New York Mets 2017', t => {
   wtfMlb.fetch('New York Mets', 2017).catch(console.log).then((res => {
     var data = res.games
     t.equal(data[0].date, 'April 3', 'has game-0-date')
-    // t.equal(data[0].result.win, true, 'has game-0-win')
-    t.equal(data[0].result.loser, 0, 'has game-0-score')
+    t.equal(data[0].win, true, 'has game-0-win')
+    t.equal(data[0].result.them, 0, 'has game-0-score')
     t.equal(data[0].attendance, 44384, 'has game-0-attendance')
     // t.equal(data.length, 170, 'has 162 games') //+ rain outs?
     t.ok(data.length > 161, 'has atleast 161 games') //+ rain outs?
