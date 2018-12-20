@@ -1,5 +1,5 @@
-// const wtf = require('wtf_wikipedia')
-const wtf = require('/Users/spencer/mountain/wtf_wikipedia/')
+const wtf = require('wtf_wikipedia')
+// const wtf = require('/Users/spencer/mountain/wtf_wikipedia/')
 const teams = require('./teams')
 const parse = require('./parse')
 const version = require('../_version')
