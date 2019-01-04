@@ -24,7 +24,7 @@ echo(banner).to(uncompressed);
 echo(banner).to(compressed);
 
 //browserify + derequire
-var cmd = browserify + ' ./src/index.js --standalone wtf-mlb';
+var cmd = browserify + ' ./src/index.js --standalone wtfmlb';
 cmd += ' -t [ babelify --presets [ @babel/preset-env ] ] ' //--no-browser-field';
 cmd += ' | ' + derequire;
 cmd += ' >> ' + uncompressed;
