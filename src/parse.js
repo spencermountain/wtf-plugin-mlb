@@ -45,6 +45,9 @@ const draftPicks = function(doc) {
 
 //grab game-data from a MLB team's wikipedia page:
 const parsePage = function(doc) {
+  if (!doc) {
+    return {}
+  }
   let res = parseTitle(doc.title())
   res.games = gameLog.season(doc)
   res.postseason = gameLog.postseason(doc)
