@@ -14,8 +14,8 @@ const parseTitle = function(season = '') {
 }
 
 //this is just a table in a 'roster' section
-const parseRoster = function(doc) {
-  let s = doc.sections('roster')
+const parseRoster = function(doc, res) {
+  let s = doc.sections('roster') || doc.sections('players') || doc.sections(res.year + ' roster')
   if (!s) {
     return {}
   }
@@ -41,8 +41,6 @@ const draftPicks = function(doc) {
   return table.keyValue()
 }
 
-
-
 //grab game-data from a MLB team's wikipedia page:
 const parsePage = function(doc) {
   if (!doc) {
@@ -52,7 +50,7 @@ const parsePage = function(doc) {
   res.games = gameLog.season(doc)
   res.postseason = gameLog.postseason(doc)
   //grab the roster/draft data
-  res.roster = parseRoster(doc)
+  res.roster = parseRoster(doc, res)
   res.draftPicks = draftPicks(doc)
   //get the per-player statistics
   res.playerStats = playerStats(doc)
