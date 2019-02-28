@@ -51,7 +51,7 @@ const parseAttendance = function(txt = '') {
     }
   }
   txt = txt.replace(/,/g, '')
-  return parseInt(txt, 10)
+  return parseInt(txt, 10) || null
 }
 
 const parsePitchers = function(row) {

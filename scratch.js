@@ -2,8 +2,10 @@
 const wtfMLB = require('./src')
 // const wtf = require('wtf_wikipedia')
 
-wtfMLB.fetch('Detroit Tigers', 2018).catch(console.log).then((obj => {
-  console.log(JSON.stringify(obj.roster, null, 2))
+wtfMLB.fetch('Toronto', 2019).catch(console.log).then((obj => {
+  // console.log(obj.games.slice(70).map((g) => g.record))
+  // console.log(JSON.stringify(obj.games.slice(70), null, 2))
+  console.log(obj)
 }))
 
 // wtfMLB.history('St. Louis Cardinals', 1977, 2018).catch(console.log).then(data => {

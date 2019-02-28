@@ -11,7 +11,7 @@ const doTable = function(rows) {
     games.push(parseGame(row))
   })
   //remove empty weird ones
-  games = games.filter((g) => g.team && g.date && g.result.winner !== undefined)
+  games = games.filter((g) => g.team && g.date) //&& g.result.winner !== undefined
   return games
 }
 
