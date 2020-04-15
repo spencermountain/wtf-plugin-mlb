@@ -1,7 +1,7 @@
 {
   "name": "wtf-plugin-mlb",
   "description": "baseball data plugin for wtf_wikipedia",
-  "version": "0.0.1",
+  "version": "2.0.0",
   "main": "./builds/wtf-plugin-mlb.js",
   "unpkg": "./builds/wtf-plugin-mlb.min.js",
   "module": "./builds/wtf-plugin-mlb.mjs",

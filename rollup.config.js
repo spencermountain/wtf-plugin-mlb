@@ -33,7 +33,7 @@ export default [
         file: `builds/${name}.js`,
         format: 'umd',
         name: 'wtfMlb',
-        sourcemap: true,
+        sourcemap: false,
       },
     ],
     plugins: [
@@ -65,7 +65,7 @@ export default [
         presets: ['@babel/preset-env'],
       }),
       terser(),
-      sizeCheck({ expect: 55, warn: 15 }),
+      sizeCheck({ expect: 5, warn: 10 }),
     ],
   },
 ]
