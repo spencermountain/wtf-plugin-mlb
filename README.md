@@ -1,3 +1,10 @@
+> **Heads-up**
+> 
+> This plugin has moved to → <a href="https://github.com/spencermountain/wtf_wikipedia/tree/master/plugins/sports">wtf_wikipedia/plugins/sports</a>
+>
+> this repo is now deprecated.
+
+
 <div align="center">
   <img src="https://cloud.githubusercontent.com/assets/399657/23590290/ede73772-01aa-11e7-8915-181ef21027bc.png" />
 
